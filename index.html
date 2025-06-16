@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WorkNet Connect</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background:white;
+      color: #333;
+      background: url(1.png);
+      scroll-behavior: smooth;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position-y : 100px;
+      background-position-x: 100px;
+      transition: background-image 0.3s ease-in-out;
+    }
+    .worker-card {
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 16px;
+  margin: 10px 0;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+.worker-card h3 {
+  margin: 0 0 5px;
+  color: #007bff;
+}
+
+.worker-card p {
+  margin: 5px 0;
+  font-size: 15px;
+}
+
+
+    header {
+      background: #dc3545;
+      color: white;
+      padding: 10px;
+      text-align: center;
+      font-weight: bold;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      background-color: #343a40;
+      flex-wrap: wrap;
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      padding: 15px 20px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    nav button.active,
+    nav button:hover {
+      background-color: #007bff;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 30px 50px;
+      margin: 50px 800px;
+      align-items: center;
+      align-content: center;
+      height : 700px;
+      width : 500px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    h1, h2 {
+      color: #007bff;
+    }
+
+    .btn {
+      margin: 10px;
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #218838;
+    }
+
+    input, select {
+      padding: 10px;
+      width: 100%;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .error {
+      color: red;
+      font-size: 14px;
+    }
+
+    #result {
+      margin-top: 20px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+  </style>
+</head>
+<body id="body">
+
+  <header>
+    ⚠ Don't pay before meeting the worker directly — worker may be a fraud!
+  </header>
+
+  <nav>
+    <button onclick="showTab('home', this);changeBackground('1.png')" class="active">🏠 Home</button>
+    <button id="registerTab" onclick="showTab('register', this);changeBackground('3.png')">📝 Register</button>
+    <button id="loginTab" onclick="showTab('login', this);changeBackground('5.png')">🔐 Login</button>
+    <button onclick="showTab('find-worker', this);changeBackground('7.jpg')">🔧 Find Worker</button>
+    <button id="profileTab" class="hidden" onclick="showTab('profile', this);changeBackground('8.jpg')" >👤 Profile</button>
+    <button id="logoutBtn" class="hidden" onclick="logout()">🚪 Logout</button>
+  </nav>
+
+  <section id="home" class="tab-content active">
+    <h1>Welcome to WorkNet Connect</h1>
+    <p>Your gateway to jobs and talent nearby 🚀</p>
+  </section>
+
+  <section id="register" class="tab-content">
+    <h2>📝 Register</h2>
+    <input type="text" id="worker-name" placeholder="Your Name">
+    <input type="text" id="worker-phone" placeholder="10-digit Mobile Number" oninput="validatePhone()">
+    <div id="phone-error" class="error"></div>
+    <input type="password" id="worker-password" placeholder="Password">
+    <select id="worker-category">
+      <option value="">Select Category</option>
+      <option>PAINT</option>
+      <option>CARPENTER</option>
+      <option>PLUMBER</option>
+      <option>ELECTRICIAN</option>
+      <option>TUTOR</option>
+      <option>MASONRY</option>
+      <option>OTHERS</option>
+    </select>
+    <button class="btn" onclick="registerWorker()">Register</button>
+  </section>
+
+  <section id="login" class="tab-content">
+    <h2>🔐 Login</h2>
+    <input type="text" id="login-phone" placeholder="Mobile Number">
+    <input type="password" id="login-password" placeholder="Password">
+    <button class="btn" onclick="loginWorker()">Login</button>
+  </section>
+
+  <section id="find-worker" class="tab-content">
+    <h2>🔧 Find Available Workers</h2>
+    <select id="search-category">
+      <option value="">Select Category</option>
+      <option>PAINT</option>
+      <option>CARPENTER</option>
+      <option>PLUMBER</option>
+      <option>ELECTRICIAN</option>
+      <option>TUTOR</option>
+      <option>MASONRY</option>
+      <option>OTHERS</option>
+    </select>
+    <select id="radius">
+      <option value="1">1 km</option>
+      <option value="3">3 km</option>
+      <option value="5">5 km</option>
+      <option value="10">10 km</option>
+    </select>
+    <button class="btn" onclick="findWorkers()">Search</button>
+    <div id="result"></div>
+  </section>
+
+  <section id="profile" class="tab-content">
+    <h2>👤 Your Profile</h2>
+    <p id="profile-info"></p>
+    <button class="btn" onclick="setAvailability(true)">✅ AVAILABLE</button>
+    <button class="btn" onclick="setAvailability(false)">❌ NOT AVAILABLE</button>
+  </section>
+
+  <script>
+    const workersDB = JSON.parse(localStorage.getItem('workersDB') || '{}');
+    let currentPhone = localStorage.getItem('currentPhone') || '';
+    let currentCategory = localStorage.getItem('currentCategory') || '';
+
+    function showTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    function changeBackground(imageFile) {
+    document.body.style.backgroundImage = `url('${imageFile}')`;
+  }
+
+    function validatePhone() {
+      const phone = document.getElementById('worker-phone').value;
+      const errorDiv = document.getElementById('phone-error');
+      errorDiv.textContent = /^\d{10}$/.test(phone) ? "" : "Phone number must be 10 digits.";
+    }
+
+    function getLocation(callback) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+          callback({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude
+          });
+        }, () => alert("Location access denied."));
+      } else {
+        alert("Geolocation not supported.");
+      }
+    }
+
+    function registerWorker() {
+      const name = document.getElementById('worker-name').value.trim();
+      const phone = document.getElementById('worker-phone').value.trim();
+      const password = document.getElementById('worker-password').value.trim();
+      const category = document.getElementById('worker-category').value;
+
+      if (!name || !/^\d{10}$/.test(phone) || !password || !category) {
+        alert("Fill all fields correctly.");
+        return;
+      }
+
+      if (!workersDB[category]) workersDB[category] = [];
+      const exists = workersDB[category].some(w => w.phone === phone);
+
+      if (exists) {
+        alert("Already registered. Please login.");
+        return;
+      }
+
+      getLocation(location => {
+        const newWorker = { name, phone, password, category, location, available: false };
+        workersDB[category].push(newWorker);
+        localStorage.setItem('workersDB', JSON.stringify(workersDB));
+        alert("Registered! Please login.");
+        showTab('login', document.querySelector('#loginTab'));
+      });
+    }
+
+    function loginWorker() {
+      const phone = document.getElementById('login-phone').value.trim();
+      const password = document.getElementById('login-password').value.trim();
+      let found = false;
+
+      for (let cat in workersDB) {
+        const worker = workersDB[cat].find(w => w.phone === phone && w.password === password);
+        if (worker) {
+          currentPhone = phone;
+          currentCategory = cat;
+          localStorage.setItem('currentPhone', phone);
+          localStorage.setItem('currentCategory', cat);
+          updateProfileTab(worker);
+          toggleAuthTabs(true);
+          showTab('profile', document.querySelector('#profileTab'));
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) alert("Invalid login credentials.");
+    }
+
+    function logout() {
+      localStorage.removeItem('currentPhone');
+      localStorage.removeItem('currentCategory');
+      currentPhone = '';
+      currentCategory = '';
+      toggleAuthTabs(false);
+      showTab('home', document.querySelector('nav button:nth-child(1)'));
+    }
+
+    function updateProfileTab(worker) {
+      document.getElementById('profile-info').innerHTML = `
+        <strong>Name:</strong> ${worker.name}<br>
+        <strong>Phone:</strong> ${worker.phone}<br>
+        <strong>Category:</strong> ${worker.category}<br>
+        <strong>Status:</strong> ${worker.available ? '✅ AVAILABLE' : '❌ NOT AVAILABLE'}
+      `;
+    }
+
+    function setAvailability(status) {
+      const workers = workersDB[currentCategory] || [];
+      const worker = workers.find(w => w.phone === currentPhone);
+      if (worker) {
+        worker.available = status;
+        localStorage.setItem('workersDB', JSON.stringify(workersDB));
+        updateProfileTab(worker);
+        alert(`Availability set to ${status ? 'AVAILABLE' : 'NOT AVAILABLE'}`);
+      }
+    }
+
+    function findWorkers() {
+      const category = document.getElementById('search-category').value;
+      const radius = parseInt(document.getElementById('radius').value);
+      if (!category) return alert("Select a category");
+
+      getLocation(userLocation => {
+        const workers = (workersDB[category] || []).filter(w => w.available);
+        const result = document.getElementById('result');
+        const R = 6371;
+
+        const nearby = workers.filter(w => {
+          const dLat = (w.location.lat - userLocation.lat) * Math.PI / 180;
+          const dLon = (w.location.lon - userLocation.lon) * Math.PI / 180;
+          const a = Math.sin(dLat/2)**2 +
+                    Math.cos(userLocation.lat * Math.PI / 180) *
+                    Math.cos(w.location.lat * Math.PI / 180) *
+                    Math.sin(dLon/2)**2;
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          return (R * c) <= radius;
+        });
+
+        if (nearby.length) {
+  result.innerHTML = `<h3>Available Workers:</h3>` + nearby.map(w =>
+    `<div class="worker-card">
+      <h3>${w.name}</h3>
+      <p><strong>Occupation:</strong> ${w.category}</p>
+      <p><strong>Phone:</strong> ${w.phone}</p>
+    </div>`
+  ).join('');
+} else {
+  result.innerHTML = "No available workers found.";
+}
+
+      });
+    }
+
+    function toggleAuthTabs(loggedIn) {
+      document.getElementById('profileTab').classList.toggle('hidden', !loggedIn);
+      document.getElementById('logoutBtn').classList.toggle('hidden', !loggedIn);
+      document.getElementById('registerTab').classList.toggle('hidden', loggedIn);
+      document.getElementById('loginTab').classList.toggle('hidden', loggedIn);
+    }
+
+    // Auto-login on page load if session exists
+    window.onload = () => {
+      if (currentPhone && currentCategory) {
+        const worker = (workersDB[currentCategory] || []).find(w => w.phone === currentPhone);
+        if (worker) {
+          updateProfileTab(worker);
+          toggleAuthTabs(true);
+        }
+      }
+    };
+  </script>
+
+</body>
+</html>
